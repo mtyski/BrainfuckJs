@@ -1,85 +1,84 @@
-﻿namespace Brainfuck.Js;
+﻿const string englishAlphabet = "abcdefghijklmnopqrstuvwxyz";
 
-public static class Program
+const string @false = "![]";
+
+const string @true = "!![]";
+
+const string zero = "+![]";
+
+const string one = "+!![]";
+
+const string infinity = $"(({one}/{zero})+[])";
+
+const string objectToString = "({}+[])";
+
+const string emptyString = "([]+[])";
+
+const string helloWorld = """console.log("Hello World!");""";
+
+Dictionary<char, string> alphabetMap = new()
 {
-    private const string EnglishAlphabet = "abcdefghijklmnopqrstuvwxyz";
+    ['t'] = $"({@true}+[])[{zero}]",
+    ['r'] = $"({@true}+[])[{Number(1)}]",
+    ['u'] = $"({@true}+[])[{Number(2)}]",
+    ['e'] = $"({@true}+[])[{Number(3)}]",
+    ['f'] = $"({@false}+[])[{Number(0)}]",
+    ['a'] = $"({@false}+[])[{Number(1)}]",
+    ['l'] = $"({@false}+[])[{Number(2)}]",
+    ['s'] = $"({@false}+[])[{Number(3)}]",
+    ['I'] = $"{infinity}[{Number(0)}]",
+    ['n'] = $"{infinity}[{Number(1)}]",
+    ['i'] = $"{infinity}[{Number(3)}]",
+    ['y'] = $"{infinity}[{Number(7)}]",
+    ['o'] = $"{objectToString}[{one}]",
+    ['b'] = $"{objectToString}[{Number(2)}]",
+    ['j'] = $"{objectToString}[{Number(3)}]",
+    ['c'] = $"{objectToString}[{Number(5)}]",
+    [' '] = $"{objectToString}[{Number(7)}]",
+    ['O'] = $"{objectToString}[{Number(8)}]",
+    ['\\'] = $"((/\\\\/)+[])[{one}]",
+};
 
-    private const string False = "![]";
+alphabetMap.Add('S', $"({emptyString}[{Constructor()}]+[])[{Number(9)}]");
+alphabetMap.Add('g', $"({emptyString}[{Constructor()}]+[])[{Number(14)}]");
+alphabetMap.Add('p', $"((/-/)[{Constructor()}]+[])[{Number(14)}]");
+alphabetMap.Add('C', $"(()=>{{}})[{Constructor()}]({Obfuscate("return escape")}+[])()(/\\\\/)[{Number(3)}]");
 
-    private const string True = "!![]";
+Console.WriteLine($"(()=>{{}})[{Constructor()}]({Obfuscate(helloWorld)}+[])()");
 
-    private const string Zero = "+![]";
+Environment.Exit(0);
 
-    private const string One = "+!![]";
-
-    private const string Infinity = $"(({One}/{Zero})+[])";
-
-    private const string ObjectToString = "({}+[])";
-
-    private const string EmptyString = "([]+[])";
-
-    private static readonly Dictionary<char, string> AlphabetMap = new()
+static string Number(int i) =>
+    i switch
     {
-        ['t'] = $"({True}+[])[{Number(0)}]",
-        ['r'] = $"({True}+[])[{Number(1)}]",
-        ['u'] = $"({True}+[])[{Number(2)}]",
-        ['e'] = $"({True}+[])[{Number(3)}]",
-        ['f'] = $"({False}+[])[{Number(0)}]",
-        ['a'] = $"({False}+[])[{Number(1)}]",
-        ['l'] = $"({False}+[])[{Number(2)}]",
-        ['s'] = $"({False}+[])[{Number(3)}]",
-        ['I'] = $"{Infinity}[{Number(0)}]",
-        ['n'] = $"{Infinity}[{Number(1)}]",
-        ['i'] = $"{Infinity}[{Number(3)}]",
-        ['y'] = $"{Infinity}[{Number(7)}]",
-        ['o'] = $"{ObjectToString}[{One}]",
-        ['b'] = $"{ObjectToString}[{Number(2)}]",
-        ['j'] = $"{ObjectToString}[{Number(3)}]",
-        ['c'] = $"{ObjectToString}[{Number(5)}]",
-        [' '] = $"{ObjectToString}[{Number(7)}]",
-        ['O'] = $"{ObjectToString}[{Number(8)}]",
-        ['\\'] = $"((/\\\\/)+[])[{One}]",
+        0 => zero,
+        1 => one,
+        _ => string.Join('+', Enumerable.Repeat(one[1..], i)),
     };
 
-    public static void Main(string[] args)
+string Constructor() => $"{Obfuscate("constructor")}+[]";
+
+string ToStringMethod() => $"{Obfuscate("toString")}+[]";
+
+string Obfuscate(string code) =>
+    string.Join(
+        '+',
+        code.Select(
+            c => alphabetMap.TryGetValue(c, out var mappedValue)
+                ? mappedValue
+                : GetUnmappedChar(c)));
+
+string GetUnmappedChar(char c)
+{
+    return (char.IsDigit(c), char.IsLower(c)) switch
     {
-        AlphabetMap.Add('S', $"({EmptyString}[{Constructor()}]+[])[{Number(9)}]");
-        AlphabetMap.Add('g', $"({EmptyString}[{Constructor()}]+[])[{Number(14)}]");
-        AlphabetMap.Add('p', $"((/-/)[{Constructor()}]+[])[{Number(14)}]");
-        AlphabetMap.Add('C', $"(()=>{{}})[{Constructor()}]({Obfuscate("return escape")}+[])()(/\\\\/)[{Number(3)}]");
+        (true, _) => $"{Number(int.Parse(new[] { c, }))}+[]",
+        (_, true) => GetLowercaseLetter(),
+        (_, false) => $"{FromCharCode()}({Number(c)})",
+    };
 
-        Console.WriteLine($"(()=>{{}})[{Constructor()}]({Obfuscate("console.log(\"Hello World!\");")}+[])()");
+    string GetLowercaseLetter() =>
+        $"({Number(englishAlphabet.IndexOf(c) + 10)})[{ToStringMethod()}]({Number(englishAlphabet.IndexOf(c) + 11)})";
 
-        Environment.Exit(0);
-    }
-
-    private static string Number(int i) =>
-        i switch
-        {
-            0 => Zero,
-            1 => One,
-            _ => string.Join('+', Enumerable.Repeat(One[1..], i)),
-        };
-
-    private static string Constructor() => $"{Obfuscate("constructor")}+[]";
-
-    private static string ToStringMethod() => $"{Obfuscate("toString")}+[]";
-
-    private static string Obfuscate(string code) =>
-        string.Join(
-            '+',
-            code.Select(
-                static c => AlphabetMap.TryGetValue(c, out var mappedValue)
-                    ? mappedValue
-                    : GetUnmappedChar(c)));
-
-    private static string GetUnmappedChar(char c)
-    {
-        return char.IsLower(c) ? GetLowercaseLetter(c) : $"{FromCharCode()}({Number(c)})";
-
-        static string GetLowercaseLetter(char c) =>
-            $"({Number(EnglishAlphabet.IndexOf(c) + 10)})[{ToStringMethod()}]({Number(EnglishAlphabet.IndexOf(c) + 11)})";
-
-        static string FromCharCode() => $"{EmptyString}[{Constructor()}][{Obfuscate("fromCharCode")}+[]]";
-    }
+    string FromCharCode() => $"{emptyString}[{Constructor()}][{Obfuscate("fromCharCode")}+[]]";
 }
